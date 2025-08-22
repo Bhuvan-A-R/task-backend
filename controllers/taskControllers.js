@@ -1,47 +1,60 @@
-const Task = require("../models/Task");
+const Task = require('../models/Task');
 
 const getTasks = async (req, res) => {
   try {
     const tasks = await Task.find();
-    res.status(200).json(tasks);
+    res.json(tasks);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching tasks", error });
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
 const createTask = async (req, res) => {
+  const { title, completed } = req.body;
+
+  const newTask = new Task({
+    title,
+    completed
+  });
+
   try {
-    const newTask = new Task(req.body);
     const savedTask = await newTask.save();
     res.status(201).json(savedTask);
   } catch (error) {
-    res.status(500).json({ message: "Error creating task", error });
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
 const updateTask = async (req, res) => {
+  const { id } = req.params;
+  const { title, completed } = req.body;
+
   try {
-    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const updatedTask = await Task.findByIdAndUpdate(
+      id,
+      { title, completed },
+      { new: true }
+    );
     if (!updatedTask) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: 'Task not found' });
     }
-    res.status(200).json(updatedTask);
+    res.json(updatedTask);
   } catch (error) {
-    res.status(500).json({ message: "Error updating task", error });
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
 const deleteTask = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const deletedTask = await Task.findByIdAndDelete(req.params.id);
+    const deletedTask = await Task.findByIdAndDelete(id);
     if (!deletedTask) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: 'Task not found' });
     }
-    res.status(200).json({ message: "Task deleted successfully" });
+    res.json({ message: 'Task deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting task", error });
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -49,5 +62,5 @@ module.exports = {
   getTasks,
   createTask,
   updateTask,
-  deleteTask,
+  deleteTask
 };
